@@ -10,9 +10,12 @@ DEFAULT_OUTPUT = "scraped_quotes.csv"
 
 
 def fetch_page(url: str) -> str:
-    response = requests.get(url, timeout=15)
-    response.raise_for_status()
-    return response.text
+    try:
+        response = requests.get(url, timeout=15)
+        response.raise_for_status()
+        return response.text
+    except requests.RequestException as exc:
+        raise RuntimeError(f"Failed to fetch data from URL: {url}") from exc
 
 
 def parse_quotes(html: str) -> List[Dict[str, str]]:
@@ -43,10 +46,12 @@ def write_csv(rows: List[Dict[str, str]], output_file: str) -> None:
         writer.writerows(rows)
 
 
-def load_html(url: str, input_file: str | None) -> str:
+def load_html(url: str | None, input_file: str | None) -> str:
     if input_file:
         with open(input_file, "r", encoding="utf-8") as file:
             return file.read()
+    if not url:
+        raise ValueError("A URL is required when --input-file is not provided.")
     return fetch_page(url)
 
 
