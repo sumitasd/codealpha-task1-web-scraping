@@ -46,12 +46,12 @@ def write_csv(rows: List[Dict[str, str]], output_file: str) -> None:
         writer.writerows(rows)
 
 
-def load_html(url: str | None, input_file: str | None) -> str:
+def load_html(url: str | None = None, input_file: str | None = None) -> str:
+    if not url and not input_file:
+        raise ValueError("Either url or input_file must be provided.")
     if input_file:
         with open(input_file, "r", encoding="utf-8") as file:
             return file.read()
-    if not url:
-        raise ValueError("A URL is required when --input-file is not provided.")
     return fetch_page(url)
 
 
