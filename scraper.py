@@ -1,6 +1,6 @@
 import argparse
 import csv
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import requests
 from bs4 import BeautifulSoup
@@ -46,12 +46,13 @@ def write_csv(rows: List[Dict[str, str]], output_file: str) -> None:
         writer.writerows(rows)
 
 
-def load_html(url: str | None = None, input_file: str | None = None) -> str:
-    if not url and not input_file:
+def load_html(url: Optional[str] = None, input_file: Optional[str] = None) -> str:
+    if not input_file and (url is None or url.strip() == ""):
         raise ValueError("Either url or input_file must be provided.")
     if input_file:
         with open(input_file, "r", encoding="utf-8") as file:
             return file.read()
+    assert url is not None
     return fetch_page(url)
 
 
@@ -68,7 +69,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    html = load_html(args.url, args.input_file)
+    html = load_html(url=args.url, input_file=args.input_file)
     rows = parse_quotes(html)
     write_csv(rows, args.output)
     print(f"Saved {len(rows)} rows to {args.output}")
